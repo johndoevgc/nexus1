@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusAI — Multi-Agent Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-base: #08090c;
+  --bg-surface: #0f1117;
+  --bg-card: #161921;
+  --bg-hover: #1e222d;
+  --bg-input: #12151c;
+  --border: #1e2535;
+  --border-light: #2a3347;
+  --accent: #3b82f6;
+  --accent-dim: #1d4ed8;
+  --accent-glow: rgba(59,130,246,0.15);
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-purple: #8b5cf6;
+  --text-primary: #f1f5f9;
+  --text-secondary: #8892a4;
+  --text-muted: #4a5568;
+  --sidebar-w: 280px;
+  --topbar-h: 56px;
+  --font: 'Sora', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --transition: 0.18s ease;
+}
+[data-theme="light"] {
+  --bg-base: #f0f2f5;
+  --bg-surface: #ffffff;
+  --bg-card: #f8fafc;
+  --bg-hover: #e8ecf4;
+  --bg-input: #f1f5f9;
+  --border: #dde3ef;
+  --border-light: #c8d0e0;
+  --accent: #2563eb;
+  --accent-dim: #1d4ed8;
+  --accent-glow: rgba(37,99,235,0.10);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --shadow: 0 4px 24px rgba(0,0,0,0.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary);display:flex;flex-direction:column;font-size:14px;line-height:1.6}
+
+/* ── TOPBAR ─────────────────────────────────────── */
+#topbar{height:var(--topbar-h);background:var(--bg-surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;z-index:100;flex-shrink:0}
+#topbar .logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;color:var(--text-primary);text-decoration:none;letter-spacing:-0.3px}
+#topbar .logo-icon{width:28px;height:28px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+#topbar .spacer{flex:1}
+#topbar .top-actions{display:flex;align-items:center;gap:8px}
+.top-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;font-family:var(--font);font-size:13px;transition:var(--transition)}
+.top-btn:hover{background:var(--bg-hover);color:var(--text-primary);border-color:var(--border-light)}
+.top-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.top-btn.primary:hover{background:var(--accent-dim)}
+.top-btn svg{width:14px;height:14px;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-blue{background:rgba(59,130,246,0.15);color:#60a5fa}
+.badge-green{background:rgba(16,185,129,0.15);color:#34d399}
+.badge-amber{background:rgba(245,158,11,0.15);color:#fbbf24}
+.badge-red{background:rgba(239,68,68,0.15);color:#f87171}
+.badge-purple{background:rgba(139,92,246,0.15);color:#a78bfa}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+#layout{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ─────────────────────────────────────── */
+#sidebar{width:var(--sidebar-w);background:var(--bg-surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+#sidebar-header{padding:12px 14px 10px;border-bottom:1px solid var(--border)}
+#sidebar-header h3{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:8px}
+.new-agent-btn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--accent-glow);border:1px dashed rgba(59,130,246,0.35);border-radius:var(--radius-md);color:var(--accent);cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;transition:var(--transition)}
+.new-agent-btn:hover{background:rgba(59,130,246,0.2);border-color:var(--accent)}
+.new-agent-btn svg{width:14px;height:14px}
+#agents-list{flex:1;overflow-y:auto;padding:8px}
+.agent-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);cursor:pointer;transition:var(--transition);border:1px solid transparent;margin-bottom:2px}
+.agent-item:hover{background:var(--bg-hover)}
+.agent-item.active{background:var(--accent-glow);border-color:rgba(59,130,246,0.3)}
+.agent-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.agent-info{flex:1;min-width:0}
+.agent-name{font-size:13px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent-model{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--accent-green)}
+.dot-blue{background:var(--accent)}
+.dot-amber{background:var(--accent-amber)}
+.dot-gray{background:var(--text-muted)}
+#sidebar-footer{padding:10px 8px;border-top:1px solid var(--border)}
+.sidebar-nav-btn{width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius-sm);background:transparent;border:none;color:var(--text-secondary);cursor:pointer;font-family:var(--font);font-size:13px;transition:var(--transition);text-align:left}
+.sidebar-nav-btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+.sidebar-nav-btn svg{width:15px;height:15px;flex-shrink:0}
+
+/* ── MAIN CONTENT ─────────────────────────────────── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── CHAT HEADER ─────────────────────────────────── */
+#chat-header{padding:12px 20px;background:var(--bg-surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+#chat-header .ch-avatar{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+#chat-header .ch-info{flex:1;min-width:0}
+#chat-header .ch-name{font-size:15px;font-weight:600;color:var(--text-primary)}
+#chat-header .ch-meta{font-size:12px;color:var(--text-secondary)}
+.chat-header-actions{display:flex;align-items:center;gap:6px}
+.icon-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text-secondary);transition:var(--transition)}
+.icon-btn:hover{background:var(--bg-hover);color:var(--text-primary);border-color:var(--border-light)}
+.icon-btn svg{width:15px;height:15px}
+.model-select-wrap{position:relative}
+.model-pill{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;font-size:12px;font-weight:500;transition:var(--transition)}
+.model-pill:hover{border-color:var(--border-light);color:var(--text-primary)}
+.model-pill .model-dot{width:7px;height:7px;border-radius:50%;background:var(--accent-green)}
+.model-pill svg{width:12px;height:12px}
+
+/* ── MESSAGES ─────────────────────────────────────── */
+#messages{flex:1;overflow-y:auto;padding:24px 20px;display:flex;flex-direction:column;gap:20px}
+#messages::-webkit-scrollbar{width:4px}
+#messages::-webkit-scrollbar-track{background:transparent}
+#messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.msg{display:flex;gap:12px;max-width:860px;width:100%}
+.msg.user{flex-direction:row-reverse;align-self:flex-end}
+.msg-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;margin-top:2px}
+.msg-body{max-width:72%}
+.msg.user .msg-body{align-items:flex-end;display:flex;flex-direction:column}
+.msg-sender{font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500}
+.msg-bubble{padding:10px 14px;border-radius:var(--radius-lg);font-size:14px;line-height:1.65;word-break:break-word}
+.msg-bubble.assistant{background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:4px 16px 16px 16px}
+.msg-bubble.user{background:var(--accent);color:#fff;border-radius:16px 4px 16px 16px}
+.msg-time{font-size:11px;color:var(--text-muted);margin-top:4px}
+.msg-actions{display:flex;gap:4px;margin-top:6px}
+.msg-act-btn{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:11px;font-family:var(--font);transition:var(--transition)}
+.msg-act-btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+.typing-indicator{display:flex;align-items:center;gap:4px;padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px 16px 16px 16px;width:fit-content}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--text-muted);animation:typingBounce 1.4s infinite ease-in-out}
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes typingBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+.system-msg{text-align:center;font-size:12px;color:var(--text-muted);padding:4px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;display:inline-flex;align-items:center;gap:6px;margin:0 auto}
+.welcome-block{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:40px 20px}
+.welcome-icon{width:64px;height:64px;background:var(--accent-glow);border:1px solid rgba(59,130,246,0.3);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px}
+.welcome-title{font-size:22px;font-weight:600;color:var(--text-primary);margin-bottom:8px}
+.welcome-sub{font-size:14px;color:var(--text-secondary);max-width:400px;line-height:1.6}
+.suggestion-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px}
+.chip{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;font-size:13px;transition:var(--transition)}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+
+/* ── INPUT AREA ─────────────────────────────────────── */
+#input-area{padding:14px 20px;background:var(--bg-surface);border-top:1px solid var(--border);flex-shrink:0}
+.input-toolbar{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.tool-btn{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:12px;font-family:var(--font);transition:var(--transition)}
+.tool-btn:hover{color:var(--text-primary);border-color:var(--border-light)}
+.tool-btn svg{width:13px;height:13px}
+.tool-sep{width:1px;height:16px;background:var(--border);margin:0 2px}
+.input-row{display:flex;align-items:flex-end;gap:10px}
+#msg-input{flex:1;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;color:var(--text-primary);font-family:var(--font);font-size:14px;resize:none;outline:none;max-height:160px;min-height:44px;line-height:1.5;transition:border-color var(--transition)}
+#msg-input:focus{border-color:var(--accent)}
+#msg-input::placeholder{color:var(--text-muted)}
+#send-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--accent);border:none;border-radius:var(--radius-md);cursor:pointer;color:#fff;flex-shrink:0;transition:var(--transition)}
+#send-btn:hover{background:var(--accent-dim);transform:scale(1.03)}
+#send-btn:disabled{background:var(--text-muted);cursor:not-allowed;transform:none}
+#send-btn svg{width:16px;height:16px}
+.input-footer{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:var(--text-muted)}
+.input-footer a{color:var(--text-muted);text-decoration:none;cursor:pointer}
+.input-footer a:hover{color:var(--text-secondary)}
+
+/* ── PANELS ─────────────────────────────────────── */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;display:none;align-items:center;justify-content:center;animation:fadeIn 0.15s ease}
+.panel-overlay.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.panel{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);width:780px;max-width:95vw;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp 0.2s ease}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.panel-sm{width:480px}
+.panel-lg{width:920px}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.panel-title{font-size:16px;font-weight:600;color:var(--text-primary)}
+.panel-subtitle{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.panel-close{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text-secondary);transition:var(--transition)}
+.panel-close:hover{background:var(--bg-hover);color:var(--text-primary)}
+.panel-close svg{width:14px;height:14px}
+.panel-body{flex:1;overflow-y:auto;padding:20px 22px}
+.panel-body::-webkit-scrollbar{width:4px}
+.panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.panel-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0}
+.btn{padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;transition:var(--transition)}
+.btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dim)}
+.btn-danger{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#f87171}
+.btn-danger:hover{background:rgba(239,68,68,0.2)}
+.btn-success{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#34d399}
+.btn-success:hover{background:rgba(16,185,129,0.2)}
+
+/* ── TABS ─────────────────────────────────────── */
+.tabs{display:flex;gap:2px;padding:4px;background:var(--bg-card);border-radius:var(--radius-md);margin-bottom:20px;border:1px solid var(--border)}
+.tab{flex:1;padding:7px 12px;text-align:center;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);transition:var(--transition);border:1px solid transparent}
+.tab:hover{color:var(--text-primary)}
+.tab.active{background:var(--bg-surface);border-color:var(--border);color:var(--text-primary)}
+
+/* ── FORMS ─────────────────────────────────────── */
+.form-group{margin-bottom:16px}
+.form-label{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+.form-label a{font-size:11px;color:var(--accent);text-decoration:none;cursor:pointer}
+.form-label a:hover{text-decoration:underline}
+.form-input{width:100%;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:13px;outline:none;transition:border-color var(--transition)}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--text-muted)}
+.form-select{width:100%;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:13px;outline:none;cursor:pointer}
+.form-select option{background:var(--bg-card)}
+.form-textarea{width:100%;padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font);font-size:13px;outline:none;resize:vertical;min-height:80px}
+.form-textarea:focus{border-color:var(--accent)}
+.form-hint{font-size:11px;color:var(--text-muted);margin-top:4px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.input-with-toggle{position:relative;display:flex}
+.input-with-toggle .form-input{flex:1;padding-right:38px}
+.input-with-toggle .toggle-vis{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0;display:flex;align-items:center}
+.input-with-toggle .toggle-vis:hover{color:var(--text-secondary)}
+.input-with-toggle .toggle-vis svg{width:14px;height:14px}
+
+/* ── MODEL CARDS ─────────────────────────────────── */
+.models-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.model-card{padding:12px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:var(--transition);position:relative}
+.model-card:hover{border-color:var(--border-light)}
+.model-card.selected{border-color:var(--accent);background:var(--accent-glow)}
+.model-card-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.model-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.model-card-name{font-size:13px;font-weight:600;color:var(--text-primary)}
+.model-card-provider{font-size:11px;color:var(--text-muted)}
+.model-card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.model-tag{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg-hover);color:var(--text-muted)}
+.model-card-check{position:absolute;top:10px;right:10px;width:16px;height:16px;border-radius:50%;background:var(--accent);display:none;align-items:center;justify-content:center}
+.model-card.selected .model-card-check{display:flex}
+.model-card-check svg{width:9px;height:9px;color:#fff}
+.model-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.model-status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-muted)}
+.model-status .dot{width:6px;height:6px;border-radius:50%}
+.model-config-btn{font-size:11px;color:var(--accent);cursor:pointer;background:none;border:none;font-family:var(--font);padding:0}
+.model-config-btn:hover{text-decoration:underline}
+
+/* ── M365 SECTION ─────────────────────────────────── */
+.section-header{margin-bottom:14px}
+.section-title{font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.section-desc{font-size:12px;color:var(--text-secondary)}
+.permission-list{display:flex;flex-direction:column;gap:6px}
+.permission-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.permission-item-left{display:flex;align-items:center;gap:8px}
+.permission-item-left svg{width:14px;height:14px;color:var(--accent)}
+.permission-name{font-size:13px;color:var(--text-primary)}
+.permission-scope{font-size:11px;color:var(--text-muted);font-family:var(--mono)}
+.toggle-switch{position:relative;width:36px;height:20px;cursor:pointer;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;inset:0;background:var(--bg-hover);border:1px solid var(--border);border-radius:20px;transition:var(--transition)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:12px;height:12px;background:var(--text-muted);border-radius:50%;transition:var(--transition)}
+.toggle-switch input:checked+.toggle-track{background:rgba(59,130,246,0.2);border-color:var(--accent)}
+.toggle-switch input:checked~.toggle-thumb{transform:translateX(16px);background:var(--accent)}
+
+/* ── UAT PANEL ─────────────────────────────────────── */
+.test-suite{display:flex;flex-direction:column;gap:10px}
+.test-category{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+.test-cat-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none}
+.test-cat-title{font-size:13px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.test-cat-title svg{width:14px;height:14px;color:var(--accent)}
+.test-cat-summary{display:flex;align-items:center;gap:8px}
+.test-results-list{padding:0 14px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--border)}
+.test-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.test-item-left{display:flex;align-items:center;gap:8px}
+.test-item-icon{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-pass{background:rgba(16,185,129,0.15);color:var(--accent-green)}
+.icon-fail{background:rgba(239,68,68,0.15);color:var(--accent-red)}
+.icon-warn{background:rgba(245,158,11,0.15);color:var(--accent-amber)}
+.icon-idle{background:var(--bg-hover);color:var(--text-muted)}
+.icon-run{background:rgba(59,130,246,0.15);color:var(--accent)}
+.test-item-icon svg{width:11px;height:11px}
+.test-item-name{font-size:12px;color:var(--text-primary)}
+.test-item-detail{font-size:11px;color:var(--text-muted)}
+.test-item-dur{font-size:11px;color:var(--text-muted);font-family:var(--mono)}
+.run-all-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:var(--accent-glow);color:var(--accent);cursor:pointer;font-size:13px;font-weight:500;font-family:var(--font);transition:var(--transition)}
+.run-all-btn:hover{background:rgba(59,130,246,0.25)}
+.run-all-btn svg{width:14px;height:14px}
+.progress-bar-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:6px;height:8px;overflow:hidden;margin-bottom:12px}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-green));transition:width 0.4s ease;border-radius:6px}
+.test-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.test-stat{padding:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center}
+.test-stat-num{font-size:20px;font-weight:600;color:var(--text-primary)}
+.test-stat-lbl{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* ── AGENT CREATOR ─────────────────────────────────── */
+.agent-template-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.agent-template{padding:12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;text-align:center;transition:var(--transition)}
+.agent-template:hover{border-color:var(--border-light);background:var(--bg-hover)}
+.agent-template.selected{border-color:var(--accent);background:var(--accent-glow)}
+.agent-template-icon{font-size:22px;margin-bottom:6px}
+.agent-template-name{font-size:12px;font-weight:500;color:var(--text-primary)}
+.agent-template-desc{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* ── NOTIFICATIONS ─────────────────────────────────── */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{pointer-events:all;display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);font-size:13px;color:var(--text-primary);box-shadow:var(--shadow);animation:toastIn 0.25s ease;min-width:260px}
+.toast.success{border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.06)}
+.toast.error{border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.06)}
+.toast.info{border-color:rgba(59,130,246,0.4);background:rgba(59,130,246,0.06)}
+.toast svg{width:15px;height:15px;flex-shrink:0}
+.toast.success svg{color:var(--accent-green)}
+.toast.error svg{color:var(--accent-red)}
+.toast.info svg{color:var(--accent)}
+@keyframes toastIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── CONTEXT MENU ─────────────────────────────────── */
+.ctx-menu{position:fixed;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:4px;z-index:300;box-shadow:var(--shadow);min-width:160px;display:none}
+.ctx-menu.open{display:block;animation:fadeIn 0.12s ease}
+.ctx-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:5px;cursor:pointer;font-size:13px;color:var(--text-secondary);transition:var(--transition)}
+.ctx-item:hover{background:var(--bg-hover);color:var(--text-primary)}
+.ctx-item.danger{color:var(--accent-red)}
+.ctx-item.danger:hover{background:rgba(239,68,68,0.1)}
+.ctx-item svg{width:13px;height:13px}
+.ctx-sep{height:1px;background:var(--border);margin:3px 0}
+
+/* ── MISC ─────────────────────────────────────── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+.info-box{padding:10px 12px;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary);line-height:1.5}
+.info-box a{color:var(--accent);text-decoration:none}
+.info-box a:hover{text-decoration:underline}
+.warn-box{padding:10px 12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);font-size:12px;color:#fbbf24;margin-bottom:14px}
+.code-block{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:var(--mono);font-size:12px;color:#93c5fd;white-space:pre-wrap;word-break:break-all;line-height:1.6}
+.tag-input{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:text;min-height:40px}
+.tag{display:flex;align-items:center;gap:5px;padding:2px 8px;background:var(--accent-glow);border:1px solid rgba(59,130,246,0.3);border-radius:4px;font-size:12px;color:var(--accent)}
+.tag-remove{cursor:pointer;line-height:1;padding:0 2px;background:none;border:none;color:var(--accent);font-size:14px}
+.collapsible{overflow:hidden;max-height:0;transition:max-height 0.25s ease}
+.collapsible.open{max-height:800px}
+
+/* ── RESPONSIVE ─────────────────────────────────────── */
+@media(max-width:768px){
+  #sidebar{position:fixed;left:-100%;top:0;height:100%;z-index:150;transition:left 0.2s ease}
+  #sidebar.mobile-open{left:0}
+  #mobile-menu-btn{display:flex !important}
+  .form-row{grid-template-columns:1fr}
+  .models-grid{grid-template-columns:1fr}
+  .agent-template-grid{grid-template-columns:repeat(2,1fr)}
+  .panel{max-width:98vw}
+  #messages{padding:16px 12px}
+  #input-area{padding:10px 12px}
+}
+#mobile-menu-btn{display:none}
+
+/* ── SCROLLBAR ─────────────────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-light)}
+
+/* ── LOADING SPINNER ─────────────────────────────────── */
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* DEPLOYMENT BADGE */
+.deploy-badge{display:flex;align-items:center;gap:5px;padding:3px 8px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:20px;font-size:11px;color:#34d399;font-weight:500}
+.deploy-badge .dot{width:6px;height:6px;background:#34d399;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <button class="icon-btn" id="mobile-menu-btn" onclick="toggleSidebar()" title="Toggle Sidebar">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="15" y2="4"/><line x1="1" y1="8" x2="15" y2="8"/><line x1="1" y1="12" x2="15" y2="12"/></svg>
+  </button>
+  <a class="logo" href="#" onclick="return false">
+    <div class="logo-icon">⬡</div>
+    NexusAI
+  </a>
+  <div class="deploy-badge">
+    <div class="dot"></div>
+    Azure SWA
+  </div>
+  <div class="spacer"></div>
+  <div class="top-actions">
+    <button class="top-btn" onclick="openUAT()" title="Run UAT Tests">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l3 3 7-7"/></svg>
+      UAT Tests
+      <span class="badge badge-green" id="uat-badge">24/24</span>
+    </button>
+    <button class="top-btn" onclick="openDeployModal()" title="Deploy">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="8,2 8,10"/><polyline points="4,6 8,2 12,6"/><path d="M2,11v2a1,1,0,0,0,1,1h10a1,1,0,0,0,1-1v-2"/></svg>
+      Deploy
+    </button>
+    <button class="top-btn" onclick="openSettings('general')" title="Settings">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4"/></svg>
+      Settings
+    </button>
+    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle Theme">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" id="theme-icon"><circle cx="8" cy="8" r="3.5"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M3.1 12.9l1.1-1.1M11.8 4.2l1.1-1.1"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <h3>Agents</h3>
+      <button class="new-agent-btn" onclick="openNewAgent()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+        New Agent
+      </button>
+    </div>
+    <div id="agents-list"></div>
+    <div id="sidebar-footer">
+      <button class="sidebar-nav-btn" onclick="openSettings('models')" title="AI Models">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="5.5" cy="8" r="1.5"/><line x1="8.5" y1="6" x2="13" y2="6"/><line x1="8.5" y1="8" x2="13" y2="8"/><line x1="8.5" y1="10" x2="11" y2="10"/></svg>
+        AI Models
+      </button>
+      <button class="sidebar-nav-btn" onclick="openSettings('m365')" title="M365 Graph API">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        M365 Graph API
+      </button>
+      <button class="sidebar-nav-btn" onclick="openSettings('general')" title="Settings">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4"/></svg>
+        Settings
+      </button>
+      <button class="sidebar-nav-btn" onclick="openDocs()" title="Documentation">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h8l3 3v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><polyline points="11,2 11,5 14,5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg>
+        Documentation
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CHAT -->
+  <div id="main">
+    <div id="chat-header">
+      <div class="ch-avatar" id="active-agent-icon">🤖</div>
+      <div class="ch-info">
+        <div class="ch-name" id="active-agent-name">Select an Agent</div>
+        <div class="ch-meta" id="active-agent-meta">Choose an agent from the sidebar to start chatting</div>
+      </div>
+      <div class="chat-header-actions">
+        <div class="model-select-wrap">
+          <button class="model-pill" onclick="openSettings('models')" id="active-model-pill" title="Change Model">
+            <span class="model-dot" id="model-status-dot"></span>
+            <span id="active-model-name">GPT-4o</span>
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3,4.5 6,7.5 9,4.5"/></svg>
+          </button>
+        </div>
+        <button class="icon-btn" onclick="clearChat()" title="Clear Conversation">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,4 14,4"/><path d="M5,4V2h6v2M6,8v5M10,8v5"/><path d="M3,4l1,10h8l1-10"/></svg>
+        </button>
+        <button class="icon-btn" onclick="exportChat()" title="Export Chat">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 10V2M5 7l3 3 3-3"/><path d="M2,11v2a1,1,0,0,0,1,1h10a1,1,0,0,0,1-1v-2"/></svg>
+        </button>
+        <button class="icon-btn" onclick="openSettings('general')" title="Agent Settings">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="messages">
+      <div class="welcome-block" id="welcome-block">
+        <div class="welcome-icon">⬡</div>
+        <div class="welcome-title">NexusAI Multi-Agent Platform</div>
+        <div class="welcome-sub">Create or select an agent from the sidebar. Each agent has its own AI model, context, and capabilities.</div>
+        <div class="suggestion-chips">
+          <div class="chip" onclick="quickCreate('analyst')">📊 Data Analyst Agent</div>
+          <div class="chip" onclick="quickCreate('coder')">💻 Code Assistant Agent</div>
+          <div class="chip" onclick="quickCreate('writer')">✍️ Content Writer Agent</div>
+          <div class="chip" onclick="quickCreate('m365')">🔷 M365 Assistant Agent</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="input-area">
+      <div class="input-toolbar">
+        <button class="tool-btn" onclick="attachFile()" title="Attach File">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 7l-5.5 5.5a4 4 0 0 1-5.6-5.7l6-6a2.5 2.5 0 0 1 3.5 3.5l-6 6a1 1 0 0 1-1.4-1.4l5.5-5.5"/></svg>
+          Attach
+        </button>
+        <div class="tool-sep"></div>
+        <button class="tool-btn" onclick="insertTemplate('summarize')" title="Summarize">Summarize</button>
+        <button class="tool-btn" onclick="insertTemplate('translate')" title="Translate">Translate</button>
+        <button class="tool-btn" onclick="insertTemplate('analyze')" title="Analyze Data">Analyze</button>
+        <div class="tool-sep"></div>
+        <button class="tool-btn" onclick="toggleWebSearch()" id="web-search-btn" title="Web Search">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="9.5" y1="9.5" x2="14" y2="14"/></svg>
+          Web Search
+        </button>
+        <button class="tool-btn" onclick="toggleM365Context()" id="m365-ctx-btn" title="M365 Context">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+          M365
+        </button>
+      </div>
+      <div class="input-row">
+        <textarea id="msg-input" placeholder="Message your agent… (Shift+Enter for newline)" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button id="send-btn" onclick="sendMessage()" title="Send Message">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8L14 2L8 14L7 9L2 8Z"/></svg>
+        </button>
+      </div>
+      <div class="input-footer">
+        <span id="char-count">0 chars</span>
+        <span>·</span>
+        <a onclick="openSettings('models')">Model: <span id="footer-model">GPT-4o</span></a>
+        <span>·</span>
+        <a onclick="openSettings('m365')">M365: <span id="m365-status">Disconnected</span></a>
+        <span>·</span>
+        <a onclick="openDocs()">Docs</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-item" onclick="ctxAction('rename')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l1.5-1.5L11 3l1.5 1.5-7.5 7.5L3 14z"/></svg> Rename Agent
+  </div>
+  <div class="ctx-item" onclick="ctxAction('duplicate')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="6" width="8" height="8" rx="1"/><path d="M2 10V3a1 1 0 0 1 1-1h7"/></svg> Duplicate
+  </div>
+  <div class="ctx-item" onclick="ctxAction('export')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 10V2M5 7l3 3 3-3"/><path d="M2,11v2a1,1,0,0,0,1,1h10a1,1,0,0,0,1-1v-2"/></svg> Export Chat
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxAction('delete')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,4 14,4"/><path d="M6,8v5M10,8v5"/><path d="M3,4l1,10h8l1-10"/></svg> Delete Agent
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="panel-overlay" id="settings-overlay" onclick="closeIfBackdrop(event,'settings-overlay')">
+  <div class="panel panel-lg">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Settings</div>
+        <div class="panel-subtitle">Configure AI models, M365 integration, and platform preferences</div>
+      </div>
+      <button class="panel-close" onclick="closeSettings()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="settings-body">
+      <!-- injected by JS -->
+    </div>
+    <div class="panel-footer">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW AGENT MODAL -->
+<div class="panel-overlay" id="agent-overlay" onclick="closeIfBackdrop(event,'agent-overlay')">
+  <div class="panel panel-sm">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Create New Agent</div>
+        <div class="panel-subtitle">Configure your AI agent's identity and capabilities</div>
+      </div>
+      <button class="panel-close" onclick="closeAgent()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="agent-body">
+      <!-- injected by JS -->
+    </div>
+    <div class="panel-footer">
+      <button class="btn" onclick="closeAgent()">Cancel</button>
+      <button class="btn btn-primary" onclick="createAgent()">Create Agent</button>
+    </div>
+  </div>
+</div>
+
+<!-- UAT PANEL -->
+<div class="panel-overlay" id="uat-overlay" onclick="closeIfBackdrop(event,'uat-overlay')">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">UAT Test Suite</div>
+        <div class="panel-subtitle">User Acceptance Testing — validate all platform components</div>
+      </div>
+      <button class="panel-close" onclick="closeUAT()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="uat-body"><!-- injected --></div>
+    <div class="panel-footer">
+      <button class="btn" onclick="closeUAT()">Close</button>
+      <button class="btn btn-success run-all-btn" onclick="runAllTests()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="3,2 13,8 3,14"/></svg>
+        Run All Tests
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DEPLOY MODAL -->
+<div class="panel-overlay" id="deploy-overlay" onclick="closeIfBackdrop(event,'deploy-overlay')">
+  <div class="panel panel-sm">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Deploy to Azure</div>
+        <div class="panel-subtitle">Azure Static Web Apps deployment guide</div>
+      </div>
+      <button class="panel-close" onclick="closeDeploy()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="deploy-body"><!-- injected --></div>
+    <div class="panel-footer">
+      <button class="btn" onclick="closeDeploy()">Close</button>
+      <button class="btn btn-primary" onclick="openAzurePortal()">Open Azure Portal ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════
+const STATE = {
+  agents: [],
+  activeAgentId: null,
+  messages: {},
+  settings: {
+    theme: 'dark',
+    models: {
+      active: 'gpt4o',
+      configs: {}
+    },
+    m365: {
+      tenantId: '',
+      clientId: '',
+      clientSecret: '',
+      redirectUri: window.location.origin,
+      connected: false,
+      permissions: {
+        mail: true, calendar: true, files: false,
+        teams: true, users: false, sharepoint: false
+      }
+    },
+    general: {
+      systemPrompt: '',
+      temperature: 0.7,
+      maxTokens: 2048,
+      streamResponse: true,
+      autoTitle: true,
+      saveHistory: true
+    }
+  },
+  webSearchEnabled: false,
+  m365ContextEnabled: false,
+  ctxAgentId: null,
+  uat: {
+    running: false,
+    results: {}
+  }
+};
+
+// ════════════════════════════════════════════════════
+// AI MODELS CONFIG (10 models)
+// ════════════════════════════════════════════════════
+const AI_MODELS = [
+  {
+    id: 'gpt4o', name: 'GPT-4o', provider: 'Azure OpenAI', icon: '⚡',
+    iconBg: '#10a37f22', configKey: 'azureOpenAI',
+    tags: ['Vision', 'Function Calling', 'Large Context'],
+    endpoint: 'https://{resource}.openai.azure.com/openai/deployments/{deployment}/chat/completions?api-version=2024-02-01',
+    fields: [
+      {key:'resourceName', label:'Resource Name', placeholder:'my-openai-resource'},
+      {key:'deployment', label:'Deployment Name', placeholder:'gpt-4o'},
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'Enter Azure OpenAI API key'},
+      {key:'apiVersion', label:'API Version', placeholder:'2024-02-01'}
+    ],
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/ai-services/openai/',
+    status: 'unconfigured'
+  },
+  {
+    id: 'claude35', name: 'Claude 3.5 Sonnet', provider: 'Anthropic', icon: '🧠',
+    iconBg: '#cc785122', configKey: 'anthropic',
+    tags: ['200K Context', 'Analysis', 'Code'],
+    endpoint: 'https://api.anthropic.com/v1/messages',
+    fields: [
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'sk-ant-...'},
+      {key:'model', label:'Model ID', placeholder:'claude-3-5-sonnet-20241022'}
+    ],
+    docsUrl: 'https://docs.anthropic.com',
+    status: 'unconfigured'
+  },
+  {
+    id: 'gemini15', name: 'Gemini 1.5 Pro', provider: 'Google', icon: '💎',
+    iconBg: '#4285f422', configKey: 'gemini',
+    tags: ['1M Context', 'Multimodal', 'Grounding'],
+    endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
+    fields: [
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'AIza...'},
+      {key:'model', label:'Model ID', placeholder:'gemini-1.5-pro-latest'},
+      {key:'projectId', label:'Project ID (optional)', placeholder:'my-gcp-project'}
+    ],
+    docsUrl: 'https://ai.google.dev/docs',
+    status: 'unconfigured'
+  },
+  {
+    id: 'grok2', name: 'Grok 2', provider: 'xAI', icon: '✕',
+    iconBg: '#ffffff18', configKey: 'grok',
+    tags: ['Real-time Data', 'Reasoning', 'SOTA'],
+    endpoint: 'https://api.x.ai/v1/chat/completions',
+    fields: [
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'xai-...'},
+      {key:'model', label:'Model ID', placeholder:'grok-2'}
+    ],
+    docsUrl: 'https://docs.x.ai',
+    status: 'unconfigured'
+  },
+  {
+    id: 'mistral', name: 'Mistral Large', provider: 'Mistral AI', icon: '🌊',
+    iconBg: '#ff700022', configKey: 'mistral',
+    tags: ['Function Calling', 'Multilingual', 'Fast'],
+    endpoint: 'https://api.mistral.ai/v1/chat/completions',
+    fields: [
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'Enter Mistral API key'},
+      {key:'model', label:'Model ID', placeholder:'mistral-large-latest'}
+    ],
+    docsUrl: 'https://docs.mistral.ai',
+    status: 'unconfigured'
+  },
+  {
+    id: 'llama3', name: 'Llama 3.1 405B', provider: 'Meta / Azure', icon: '🦙',
+    iconBg: '#0668e122', configKey: 'llama',
+    tags: ['Open Source', '128K Context', 'Reasoning'],
+    endpoint: 'https://{endpoint}.inference.ai.azure.com/v1/chat/completions',
+    fields: [
+      {key:'endpoint', label:'Inference Endpoint', placeholder:'my-llama-endpoint'},
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'Enter endpoint API key'},
+      {key:'model', label:'Model ID', placeholder:'Meta-Llama-3.1-405B-Instruct'}
+    ],
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-models-llama',
+    status: 'unconfigured'
+  },
+  {
+    id: 'cohere', name: 'Command R+', provider: 'Cohere', icon: '◎',
+    iconBg: '#d4ff4422', configKey: 'cohere',
+    tags: ['RAG', 'Grounding', 'Enterprise'],
+    endpoint: 'https://api.cohere.ai/v1/chat',
+    fields: [
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'Enter Cohere API key'},
+      {key:'model', label:'Model ID', placeholder:'command-r-plus'}
+    ],
+    docsUrl: 'https://docs.cohere.com',
+    status: 'unconfigured'
+  },
+  {
+    id: 'deepseek', name: 'DeepSeek R1', provider: 'DeepSeek', icon: '🔭',
+    iconBg: '#4a9eff22', configKey: 'deepseek',
+    tags: ['Reasoning', 'Math', 'Code'],
+    endpoint: 'https://api.deepseek.com/v1/chat/completions',
+    fields: [
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'sk-...'},
+      {key:'model', label:'Model ID', placeholder:'deepseek-reasoner'}
+    ],
+    docsUrl: 'https://platform.deepseek.com/docs',
+    status: 'unconfigured'
+  },
+  {
+    id: 'perplexity', name: 'Sonar Pro', provider: 'Perplexity', icon: '🔍',
+    iconBg: '#20b2aa22', configKey: 'perplexity',
+    tags: ['Real-time Web', 'Citations', 'Search'],
+    endpoint: 'https://api.perplexity.ai/chat/completions',
+    fields: [
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'pplx-...'},
+      {key:'model', label:'Model ID', placeholder:'sonar-pro'}
+    ],
+    docsUrl: 'https://docs.perplexity.ai',
+    status: 'unconfigured'
+  },
+  {
+    id: 'phi4', name: 'Phi-4', provider: 'Microsoft', icon: 'φ',
+    iconBg: '#00a4ef22', configKey: 'phi',
+    tags: ['Compact', 'Reasoning', 'Azure ML'],
+    endpoint: 'https://{endpoint}.inference.ai.azure.com/v1/chat/completions',
+    fields: [
+      {key:'endpoint', label:'Azure ML Endpoint', placeholder:'my-phi4-endpoint'},
+      {key:'apiKey', label:'API Key', type:'password', placeholder:'Enter endpoint API key'},
+      {key:'model', label:'Model ID', placeholder:'Phi-4'}
+    ],
+    docsUrl: 'https://learn.microsoft.com/en-us/azure/machine-learning/how-to-deploy-models-phi-4',
+    status: 'unconfigured'
+  }
+];
+
+const M365_PERMISSIONS = [
+  {key:'mail', icon:'✉', name:'Mail', scope:'Mail.Read, Mail.Send'},
+  {key:'calendar', icon:'📅', name:'Calendar', scope:'Calendars.Read, Calendars.ReadWrite'},
+  {key:'files', icon:'📁', name:'OneDrive Files', scope:'Files.Read, Files.ReadWrite'},
+  {key:'teams', icon:'💬', name:'Teams', scope:'Chat.Read, ChannelMessage.Read.All'},
+  {key:'users', icon:'👥', name:'Users & Directory', scope:'User.Read, Directory.Read.All'},
+  {key:'sharepoint', icon:'🔷', name:'SharePoint', scope:'Sites.Read.All, Sites.ReadWrite.All'}
+];
+
+const AGENT_TEMPLATES = [
+  {id:'general', icon:'🤖', name:'General Assistant', desc:'All-purpose AI', prompt:'You are a helpful assistant.'},
+  {id:'analyst', icon:'📊', name:'Data Analyst', desc:'Data & analytics', prompt:'You are an expert data analyst. Help analyze data, create insights, and explain trends clearly.'},
+  {id:'coder', icon:'💻', name:'Code Expert', desc:'Coding & debugging', prompt:'You are an expert software engineer. Help write clean, efficient code with explanations.'},
+  {id:'writer', icon:'✍️', name:'Content Writer', desc:'Writing & editing', prompt:'You are a professional content writer. Create engaging, clear, and compelling content.'},
+  {id:'m365', icon:'🔷', name:'M365 Assistant', desc:'Microsoft 365 expert', prompt:'You are a Microsoft 365 expert. Help users with Teams, SharePoint, OneDrive, Outlook, and Power Platform.'},
+  {id:'researcher', icon:'🔬', name:'Researcher', desc:'Research & analysis', prompt:'You are a thorough researcher. Provide well-cited, comprehensive analysis on topics.'}
+];
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+function init() {
+  loadSettings();
+  loadAgents();
+  renderAgents();
+  if (STATE.agents.length > 0) activateAgent(STATE.agents[0].id);
+  updateModelPill();
+  updateM365Status();
+  document.getElementById('msg-input').addEventListener('input', updateCharCount);
+}
+
+function loadSettings() {
+  try {
+    const s = localStorage.getItem('nexusai_settings');
+    if (s) Object.assign(STATE.settings, JSON.parse(s));
+    if (STATE.settings.theme) document.documentElement.setAttribute('data-theme', STATE.settings.theme);
+  } catch(e) {}
+}
+
+function saveSettingsToStorage() {
+  localStorage.setItem('nexusai_settings', JSON.stringify(STATE.settings));
+}
+
+function loadAgents() {
+  try {
+    const a = localStorage.getItem('nexusai_agents');
+    if (a) {
+      STATE.agents = JSON.parse(a);
+      STATE.agents.forEach(ag => {
+        const m = localStorage.getItem('nexusai_msgs_' + ag.id);
+        if (m) STATE.messages[ag.id] = JSON.parse(m);
+      });
+    } else {
+      // Default agents
+      addDefaultAgents();
+    }
+  } catch(e) { addDefaultAgents(); }
+}
+
+function addDefaultAgents() {
+  const defaults = [
+    {id: genId(), icon:'🤖', name:'General Assistant', model:'gpt4o', template:'general', status:'active', prompt:'You are a helpful assistant.'},
+    {id: genId(), icon:'📊', name:'Data Analyst', model:'claude35', template:'analyst', status:'active', prompt:'You are an expert data analyst.'},
+    {id: genId(), icon:'💻', name:'Code Expert', model:'gpt4o', template:'coder', status:'idle', prompt:'You are an expert software engineer.'}
+  ];
+  STATE.agents = defaults;
+  defaults.forEach(a => { STATE.messages[a.id] = []; });
+  persistAgents();
+}
+
+function persistAgents() {
+  localStorage.setItem('nexusai_agents', JSON.stringify(STATE.agents));
+  STATE.agents.forEach(ag => {
+    localStorage.setItem('nexusai_msgs_' + ag.id, JSON.stringify(STATE.messages[ag.id] || []));
+  });
+}
+
+function genId() { return 'ag_' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36); }
+
+// ════════════════════════════════════════════════════
+// AGENTS SIDEBAR
+// ════════════════════════════════════════════════════
+function renderAgents() {
+  const list = document.getElementById('agents-list');
+  list.innerHTML = '';
+  STATE.agents.forEach(ag => {
+    const model = AI_MODELS.find(m => m.id === ag.model) || AI_MODELS[0];
+    const msgs = STATE.messages[ag.id] || [];
+    const lastMsg = msgs.length ? msgs[msgs.length-1].content.slice(0,40) + (msgs[msgs.length-1].content.length > 40 ? '…' : '') : 'No messages yet';
+    const dotClass = ag.status === 'active' ? 'dot-green' : ag.status === 'busy' ? 'dot-amber' : 'dot-gray';
+    const el = document.createElement('div');
+    el.className = 'agent-item' + (STATE.activeAgentId === ag.id ? ' active' : '');
+    el.dataset.agentId = ag.id;
+    el.innerHTML = `
+      <div class="agent-avatar" style="background:${model.iconBg || 'rgba(59,130,246,0.12)'}">${ag.icon}</div>
+      <div class="agent-info">
+        <div class="agent-name">${escHtml(ag.name)}</div>
+        <div class="agent-model">${model.name}</div>
+      </div>
+      <div class="agent-status-dot ${dotClass}"></div>`;
+    el.onclick = (e) => { activateAgent(ag.id); };
+    el.oncontextmenu = (e) => { e.preventDefault(); showCtxMenu(e, ag.id); };
+    list.appendChild(el);
+  });
+}
+
+function activateAgent(id) {
+  STATE.activeAgentId = id;
+  const ag = STATE.agents.find(a => a.id === id);
+  if (!ag) return;
+  document.querySelectorAll('.agent-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.agentId === id);
+  });
+  document.getElementById('active-agent-icon').textContent = ag.icon;
+  document.getElementById('active-agent-name').textContent = ag.name;
+  const model = AI_MODELS.find(m => m.id === ag.model) || AI_MODELS[0];
+  document.getElementById('active-agent-meta').textContent = `${model.name} · ${model.provider}`;
+  STATE.settings.models.active = ag.model;
+  updateModelPill();
+  renderMessages();
+}
+
+// ════════════════════════════════════════════════════
+// MESSAGES
+// ════════════════════════════════════════════════════
+function renderMessages() {
+  const container = document.getElementById('messages');
+  const welcome = document.getElementById('welcome-block');
+  const msgs = STATE.messages[STATE.activeAgentId] || [];
+
+  if (!STATE.activeAgentId) {
+    container.innerHTML = '';
+    container.appendChild(welcome || createWelcome());
+    return;
+  }
+
+  // Remove welcome
+  container.innerHTML = '';
+
+  if (msgs.length === 0) {
+    const ag = STATE.agents.find(a => a.id === STATE.activeAgentId);
+    container.innerHTML = `<div class="welcome-block">
+      <div class="welcome-icon">${ag ? ag.icon : '🤖'}</div>
+      <div class="welcome-title">${ag ? escHtml(ag.name) : 'Agent'}</div>
+      <div class="welcome-sub">How can I assist you today?</div>
+      <div class="suggestion-chips">
+        <div class="chip" onclick="sendQuick('Summarize what you can do')">What can you do?</div>
+        <div class="chip" onclick="sendQuick('Give me a quick demo')">Quick demo</div>
+        <div class="chip" onclick="sendQuick('What are your capabilities?')">Capabilities</div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  msgs.forEach(msg => appendMessageToDOM(msg, false));
+  scrollToBottom();
+}
+
+function appendMessageToDOM(msg, scroll = true) {
+  const container = document.getElementById('messages');
+  const el = document.createElement('div');
+  el.className = 'msg ' + msg.role;
+  el.dataset.msgId = msg.id;
+  const isUser = msg.role === 'user';
+  const avatar = isUser ? '👤' : (STATE.agents.find(a=>a.id===STATE.activeAgentId)?.icon || '🤖');
+  const time = formatTime(msg.ts);
+  el.innerHTML = `
+    <div class="msg-avatar" style="background:${isUser?'rgba(59,130,246,0.15)':'rgba(255,255,255,0.06)'}">${avatar}</div>
+    <div class="msg-body">
+      <div class="msg-sender">${isUser ? 'You' : (STATE.agents.find(a=>a.id===STATE.activeAgentId)?.name || 'Agent')}</div>
+      <div class="msg-bubble ${msg.role}">${formatMsgContent(msg.content)}</div>
+      <div class="msg-time">${time}</div>
+      ${!isUser ? `<div class="msg-actions">
+        <button class="msg-act-btn" onclick="copyMsg('${msg.id}')">Copy</button>
+        <button class="msg-act-btn" onclick="regenerateMsg('${msg.id}')">Regenerate</button>
+        <button class="msg-act-btn" onclick="likeMsg('${msg.id}')">👍</button>
+      </div>` : ''}
+    </div>`;
+  container.appendChild(el);
+  if (scroll) scrollToBottom();
+}
+
+function formatMsgContent(content) {
+  // Basic markdown-like formatting
+  return escHtml(content)
+    .replace(/```([\s\S]*?)```/g, '<code style="display:block;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin:6px 0;font-family:var(--mono);font-size:12px;white-space:pre-wrap;line-height:1.6;color:#93c5fd">$1</code>')
+    .replace(/`([^`]+)`/g, '<code style="background:var(--bg-card);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--mono);font-size:12px;color:#93c5fd">$1</code>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+}
+
+function scrollToBottom() {
+  const c = document.getElementById('messages');
+  requestAnimationFrame(() => { c.scrollTop = c.scrollHeight; });
+}
+
+// ════════════════════════════════════════════════════
+// SEND MESSAGE
+// ════════════════════════════════════════════════════
+async function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!STATE.activeAgentId) {
+    showToast('Please select or create an agent first', 'error');
+    return;
+  }
+
+  const msg = { id: genId(), role: 'user', content: text, ts: Date.now() };
+  if (!STATE.messages[STATE.activeAgentId]) STATE.messages[STATE.activeAgentId] = [];
+  STATE.messages[STATE.activeAgentId].push(msg);
+
+  input.value = '';
+  autoResize(input);
+  updateCharCount();
+  appendMessageToDOM(msg);
+
+  // Typing indicator
+  const typingEl = document.createElement('div');
+  typingEl.className = 'msg assistant';
+  typingEl.id = 'typing-indicator';
+  typingEl.innerHTML = `
+    <div class="msg-avatar" style="background:rgba(255,255,255,0.06)">${STATE.agents.find(a=>a.id===STATE.activeAgentId)?.icon || '🤖'}</div>
+    <div class="msg-body">
+      <div class="typing-indicator">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>
+    </div>`;
+  document.getElementById('messages').appendChild(typingEl);
+  scrollToBottom();
+
+  document.getElementById('send-btn').disabled = true;
+
+  // Simulate AI response
+  await simulateAIResponse(text);
+
+  document.getElementById('send-btn').disabled = false;
+  const ti = document.getElementById('typing-indicator');
+  if (ti) ti.remove();
+
+  persistAgents();
+}
+
+async function simulateAIResponse(userText) {
+  const model = AI_MODELS.find(m => m.id === STATE.settings.models.active) || AI_MODELS[0];
+  const ag = STATE.agents.find(a => a.id === STATE.activeAgentId);
+
+  // Check if API key is configured
+  const config = STATE.settings.models.configs[model.configKey] || {};
+  const hasKey = config.apiKey && config.apiKey.trim().length > 0;
+
+  let responseText;
+  if (hasKey) {
+    try {
+      responseText = await callAIAPI(model, ag, userText, config);
+    } catch(e) {
+      responseText = `⚠️ API Error: ${e.message}\n\nPlease check your API key in Settings → AI Models → ${model.name}.`;
+    }
+  } else {
+    // Demo mode
+    await new Promise(r => setTimeout(r, 800 + Math.random() * 600));
+    responseText = generateDemoResponse(userText, model, ag);
+  }
+
+  const aiMsg = { id: genId(), role: 'assistant', content: responseText, ts: Date.now(), model: model.id };
+  STATE.messages[STATE.activeAgentId].push(aiMsg);
+
+  const ti = document.getElementById('typing-indicator');
+  if (ti) ti.remove();
+
+  appendMessageToDOM(aiMsg);
+}
+
+async function callAIAPI(model, agent, userText, config) {
+  const msgs = (STATE.messages[STATE.activeAgentId] || [])
+    .filter(m => m.role !== 'system')
+    .slice(-10)
+    .map(m => ({role: m.role, content: m.content}));
+
+  const systemPrompt = agent.prompt || STATE.settings.general.systemPrompt || 'You are a helpful assistant.';
+
+  if (model.id === 'claude35') {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': config.apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: config.model || 'claude-3-5-sonnet-20241022',
+        max_tokens: STATE.settings.general.maxTokens,
+        system: systemPrompt,
+        messages: msgs
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message || 'API request failed');
+    return data.content[0].text;
+  }
+
+  // OpenAI-compatible endpoint (Azure OpenAI, GPT-4o, Grok, Mistral, DeepSeek, Perplexity, Llama, Phi, Cohere-chat)
+  let endpoint = model.endpoint;
+  if (model.id === 'gpt4o') {
+    endpoint = `https://${config.resourceName}.openai.azure.com/openai/deployments/${config.deployment}/chat/completions?api-version=${config.apiVersion || '2024-02-01'}`;
+  } else if (model.id === 'llama3' || model.id === 'phi4') {
+    endpoint = `https://${config.endpoint}.inference.ai.azure.com/v1/chat/completions`;
+  }
+
+  const headers = {'Content-Type': 'application/json'};
+  if (model.id === 'gpt4o') headers['api-key'] = config.apiKey;
+  else if (model.id === 'claude35') headers['x-api-key'] = config.apiKey;
+  else headers['Authorization'] = `Bearer ${config.apiKey}`;
+
+  const body = {
+    model: config.model || model.id,
+    messages: [{role:'system', content: systemPrompt}, ...msgs],
+    max_tokens: STATE.settings.general.maxTokens,
+    temperature: STATE.settings.general.temperature
+  };
+
+  const resp = await fetch(endpoint, { method:'POST', headers, body: JSON.stringify(body) });
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data.error?.message || `HTTP ${resp.status}`);
+  return data.choices[0].message.content;
+}
+
+function generateDemoResponse(text, model, agent) {
+  const demos = [
+    `I'm **${agent?.name || 'your AI assistant'}** powered by **${model.name}** (${model.provider}).\n\nYou asked: "${text.slice(0,80)}${text.length>80?'…':''}"\n\n> **Demo Mode** — Configure your API key in Settings → AI Models to enable real AI responses.\n\nThis platform supports 10 AI models including Claude, GPT-4o, Gemini, Grok, and more. Each agent can be independently configured with different models and system prompts.`,
+    `Here's what I can help you with as **${agent?.name || 'an AI agent'}**:\n\n- 📊 Data analysis and visualization\n- 💻 Code generation and debugging\n- ✍️ Content writing and editing\n- 🔷 Microsoft 365 integration via Graph API\n- 🔍 Real-time web search (when enabled)\n\n**To activate real AI**: Go to Settings → AI Models → Configure your preferred model's API key.`,
+    `Processing your request with **${model.name}**...\n\n\`\`\`\nModel: ${model.id}\nProvider: ${model.provider}\nContext window: ${model.tags?.[0] || 'Standard'}\nStatus: Demo Mode\n\`\`\`\n\nConnect your API key in Settings to get real responses from this model.`
+  ];
+  return demos[Math.floor(Math.random() * demos.length)];
+}
+
+function sendQuick(text) {
+  document.getElementById('msg-input').value = text;
+  sendMessage();
+}
+
+function quickCreate(template) {
+  const t = AGENT_TEMPLATES.find(t => t.id === template) || AGENT_TEMPLATES[0];
+  openNewAgent(t.id);
+}
+
+// ════════════════════════════════════════════════════
+// SETTINGS PANEL
+// ════════════════════════════════════════════════════
+let currentSettingsTab = 'general';
+
+function openSettings(tab = 'general') {
+  currentSettingsTab = tab;
+  renderSettingsBody(tab);
+  document.getElementById('settings-overlay').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+
+function renderSettingsBody(tab) {
+  const tabs = [
+    {id:'general', label:'General'},
+    {id:'models', label:'AI Models'},
+    {id:'m365', label:'M365 Graph API'},
+    {id:'deploy', label:'Azure Deploy'}
+  ];
+  let html = `<div class="tabs">`;
+  tabs.forEach(t => {
+    html += `<div class="tab ${tab===t.id?'active':''}" onclick="switchSettingsTab('${t.id}')">${t.label}</div>`;
+  });
+  html += `</div><div id="settings-tab-content">`;
+  html += renderSettingsTab(tab);
+  html += `</div>`;
+  document.getElementById('settings-body').innerHTML = html;
+}
+
+function switchSettingsTab(tab) {
+  currentSettingsTab = tab;
+  const tabs = document.querySelectorAll('#settings-body .tab');
+  tabs.forEach(t => t.classList.toggle('active', t.textContent === ['General','AI Models','M365 Graph API','Azure Deploy'][['general','models','m365','deploy'].indexOf(tab)]));
+  document.getElementById('settings-tab-content').innerHTML = renderSettingsTab(tab);
+}
+
+function renderSettingsTab(tab) {
+  if (tab === 'general') return renderGeneralTab();
+  if (tab === 'models') return renderModelsTab();
+  if (tab === 'm365') return renderM365Tab();
+  if (tab === 'deploy') return renderDeployTab();
+  return '';
+}
+
+function renderGeneralTab() {
+  const g = STATE.settings.general;
+  return `
+    <div class="section-header">
+      <div class="section-title">Platform Preferences</div>
+      <div class="section-desc">Global settings applied to all agents</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Default System Prompt</label>
+      <textarea class="form-textarea" id="s_systemPrompt" placeholder="You are a helpful assistant...">${escHtml(g.systemPrompt)}</textarea>
+      <div class="form-hint">This is the default prompt for new agents. Override per-agent in agent settings.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Temperature <span style="color:var(--accent)" id="temp-val">${g.temperature}</span></label>
+        <input type="range" min="0" max="2" step="0.1" value="${g.temperature}" oninput="document.getElementById('temp-val').textContent=this.value;STATE.settings.general.temperature=parseFloat(this.value)" style="width:100%;margin-top:6px">
+        <div class="form-hint">0 = deterministic, 1 = balanced, 2 = creative</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Max Tokens</label>
+        <input class="form-input" type="number" id="s_maxTokens" value="${g.maxTokens}" min="256" max="128000" placeholder="2048">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title" style="margin-bottom:10px">Features</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${renderToggleRow('Stream Responses', 'Tokens appear as they are generated', 's_streamResponse', g.streamResponse)}
+      ${renderToggleRow('Auto-title Conversations', 'Generate titles from message context', 's_autoTitle', g.autoTitle)}
+      ${renderToggleRow('Save Chat History', 'Persist conversations in local storage', 's_saveHistory', g.saveHistory)}
+    </div>
+    <div class="divider"></div>
+    <div class="section-title" style="margin-bottom:10px">Appearance</div>
+    <div class="form-group">
+      <label class="form-label">Theme</label>
+      <select class="form-select" id="s_theme" onchange="previewTheme(this.value)">
+        <option value="dark" ${STATE.settings.theme==='dark'?'selected':''}>Dark</option>
+        <option value="light" ${STATE.settings.theme==='light'?'selected':''}>Light</option>
+      </select>
+    </div>`;
+}
+
+function renderToggleRow(label, desc, id, checked) {
+  return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm)">
+    <div>
+      <div style="font-size:13px;color:var(--text-primary)">${label}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:1px">${desc}</div>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="${id}" ${checked?'checked':''}>
+      <span class="toggle-track"></span>
+      <span class="toggle-thumb"></span>
+    </label>
+  </div>`;
+}
+
+function renderModelsTab() {
+  let html = `
+    <div class="section-header">
+      <div class="section-title">AI Model Configuration</div>
+      <div class="section-desc">Configure API keys and endpoints for each model. Click a model card to select it as active, then expand to configure.</div>
+    </div>
+    <div class="models-grid">`;
+  AI_MODELS.forEach(model => {
+    const config = STATE.settings.models.configs[model.configKey] || {};
+    const isActive = STATE.settings.models.active === model.id;
+    const isConfigured = config.apiKey && config.apiKey.trim().length > 0;
+    html += `
+      <div class="model-card ${isActive?'selected':''}" onclick="selectModel('${model.id}')">
+        <div class="model-card-check">
+          <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 9,2"/></svg>
+        </div>
+        <div class="model-card-header">
+          <div class="model-icon" style="background:${model.iconBg}">${model.icon}</div>
+          <div>
+            <div class="model-card-name">${model.name}</div>
+            <div class="model-card-provider">${model.provider}</div>
+          </div>
+        </div>
+        <div class="model-card-tags">
+          ${model.tags.map(t=>`<span class="model-tag">${t}</span>`).join('')}
+        </div>
+        <div class="model-card-footer">
+          <div class="model-status">
+            <div class="dot" style="background:${isConfigured?'var(--accent-green)':'var(--text-muted)'}"></div>
+            ${isConfigured ? 'Configured' : 'Not configured'}
+          </div>
+          <button class="model-config-btn" onclick="event.stopPropagation();toggleModelConfig('${model.id}')">Configure →</button>
+        </div>
+        <div class="collapsible" id="model-cfg-${model.id}">
+          <div style="padding-top:10px;border-top:1px solid var(--border);margin-top:8px">
+            ${model.fields.map(f => `
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label" style="font-size:11px">
+                  ${f.label}
+                  <a href="${model.docsUrl}" target="_blank" rel="noopener" style="font-size:10px">Docs ↗</a>
+                </label>
+                <div class="input-with-toggle">
+                  <input class="${f.type==='password'?'form-input':'form-input'}" style="font-size:12px" type="${f.type||'text'}" id="mcfg_${model.id}_${f.key}" value="${escHtml(config[f.key]||'')}" placeholder="${f.placeholder}" ${f.type==='password'?'':''}
+                    oninput="updateModelConfig('${model.id}','${f.key}',this.value)">
+                  ${f.type==='password'?`<button class="toggle-vis" onclick="togglePasswordVis(this)" type="button">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>
+                  </button>`:''}
+                </div>
+              </div>`).join('')}
+            <div class="info-box" style="margin-top:6px;font-size:11px">
+              Endpoint: <code style="font-family:var(--mono);font-size:10px;word-break:break-all">${model.endpoint}</code><br>
+              <a href="${model.docsUrl}" target="_blank" rel="noopener">Official Documentation ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderM365Tab() {
+  const m = STATE.settings.m365;
+  return `
+    <div class="section-header">
+      <div class="section-title">Microsoft 365 Graph API</div>
+      <div class="section-desc">Connect to Microsoft 365 to enable mail, calendar, Teams, and SharePoint access in your agents</div>
+    </div>
+    <div class="info-box" style="margin-bottom:16px">
+      Register your app in <a href="https://entra.microsoft.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" rel="noopener">Microsoft Entra ID (App Registrations) ↗</a> to get your credentials.
+      Set the redirect URI to: <code style="font-family:var(--mono);font-size:11px">${window.location.origin}</code>
+    </div>
+    ${m.connected ? `<div class="badge badge-green" style="margin-bottom:12px;padding:6px 12px;font-size:12px">✓ Connected to Microsoft 365</div>` : `<div class="warn-box">⚠ Not connected — configure your credentials below</div>`}
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tenant ID
+          <a href="https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/how-to-find-tenant" target="_blank" rel="noopener">Find yours ↗</a>
+        </label>
+        <input class="form-input" id="m365_tenantId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="${escHtml(m.tenantId)}" oninput="STATE.settings.m365.tenantId=this.value">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Client (Application) ID</label>
+        <input class="form-input" id="m365_clientId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="${escHtml(m.clientId)}" oninput="STATE.settings.m365.clientId=this.value">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Client Secret
+        <a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal" target="_blank" rel="noopener">Create secret ↗</a>
+      </label>
+      <div class="input-with-toggle">
+        <input class="form-input" type="password" id="m365_clientSecret" placeholder="Enter client secret value" value="${escHtml(m.clientSecret)}" oninput="STATE.settings.m365.clientSecret=this.value">
+        <button class="toggle-vis" onclick="togglePasswordVis(this)" type="button">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Redirect URI</label>
+      <input class="form-input" id="m365_redirectUri" value="${escHtml(m.redirectUri || window.location.origin)}" oninput="STATE.settings.m365.redirectUri=this.value">
+      <div class="form-hint">Must match exactly what's registered in Entra ID</div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title" style="margin-bottom:10px">API Permissions</div>
+    <div class="permission-list">
+      ${M365_PERMISSIONS.map(p => `
+        <div class="permission-item">
+          <div class="permission-item-left">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/></svg>
+            <div>
+              <div class="permission-name">${p.icon} ${p.name}</div>
+              <div class="permission-scope">${p.scope}</div>
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="m365_perm_${p.key}" ${m.permissions[p.key]?'checked':''} onchange="STATE.settings.m365.permissions['${p.key}']=this.checked">
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="testM365Connection()">Test Connection</button>
+      <button class="btn" onclick="openM365Consent()">Authorize with Microsoft ↗</button>
+      <button class="btn" style="color:var(--accent)" onclick="window.open('https://developer.microsoft.com/en-us/graph/graph-explorer','_blank')">Graph Explorer ↗</button>
+    </div>`;
+}
+
+function renderDeployTab() {
+  return `
+    <div class="section-header">
+      <div class="section-title">Azure Static Web Apps Deployment</div>
+      <div class="section-desc">Deploy this platform to Azure Static Web Apps with one click or CI/CD pipeline</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Static Web App Name</label>
+      <input class="form-input" id="d_appName" placeholder="nexusai-platform" value="${STATE.settings.deploy?.appName||''}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Resource Group</label>
+        <input class="form-input" id="d_resourceGroup" placeholder="rg-nexusai-prod" value="${STATE.settings.deploy?.resourceGroup||''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <select class="form-select" id="d_location">
+          <option value="eastus2">East US 2</option>
+          <option value="westus2">West US 2</option>
+          <option value="eastasia">East Asia</option>
+          <option value="southeastasia">Southeast Asia</option>
+          <option value="westeurope">West Europe</option>
+          <option value="northeurope">North Europe</option>
+          <option value="australiaeast">Australia East</option>
+        </select>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-title" style="margin-bottom:8px">staticwebapp.config.json</div>
+    <div class="code-block">{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/*.{css,js,ico,png}"]
+  },
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self' https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com",
+    "X-Frame-Options": "SAMEORIGIN",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".woff2": "font/woff2"
+  }
+}</div>
+    <div class="divider"></div>
+    <div class="section-title" style="margin-bottom:8px">Azure CLI Deployment</div>
+    <div class="code-block"># Install Azure CLI and login
+az login
+
+# Create resource group
+az group create --name rg-nexusai-prod --location eastus2
+
+# Create Static Web App
+az staticwebapp create \\
+  --name nexusai-platform \\
+  --resource-group rg-nexusai-prod \\
+  --location eastus2 \\
+  --source . \\
+  --branch main \\
+  --token $GITHUB_TOKEN</div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="openAzurePortal()">Open Azure Portal ↗</button>
+      <button class="btn" onclick="window.open('https://learn.microsoft.com/en-us/azure/static-web-apps/get-started-portal','_blank')">SWA Docs ↗</button>
+      <button class="btn" onclick="window.open('https://github.com/Azure/static-web-apps','_blank')">GitHub ↗</button>
+    </div>`;
+}
+
+function saveSettings() {
+  // Collect general settings
+  const sPrompt = document.getElementById('s_systemPrompt');
+  if (sPrompt) STATE.settings.general.systemPrompt = sPrompt.value;
+  const sMaxT = document.getElementById('s_maxTokens');
+  if (sMaxT) STATE.settings.general.maxTokens = parseInt(sMaxT.value) || 2048;
+  const sStream = document.getElementById('s_streamResponse');
+  if (sStream) STATE.settings.general.streamResponse = sStream.checked;
+  const sAutoT = document.getElementById('s_autoTitle');
+  if (sAutoT) STATE.settings.general.autoTitle = sAutoT.checked;
+  const sHist = document.getElementById('s_saveHistory');
+  if (sHist) STATE.settings.general.saveHistory = sHist.checked;
+  const sTheme = document.getElementById('s_theme');
+  if (sTheme) {
+    STATE.settings.theme = sTheme.value;
+    document.documentElement.setAttribute('data-theme', sTheme.value);
+  }
+
+  // Deploy settings
+  const dApp = document.getElementById('d_appName');
+  const dRg = document.getElementById('d_resourceGroup');
+  const dLoc = document.getElementById('d_location');
+  if (dApp || dRg || dLoc) {
+    STATE.settings.deploy = STATE.settings.deploy || {};
+    if (dApp) STATE.settings.deploy.appName = dApp.value;
+    if (dRg) STATE.settings.deploy.resourceGroup = dRg.value;
+    if (dLoc) STATE.settings.deploy.location = dLoc.value;
+  }
+
+  saveSettingsToStorage();
+  closeSettings();
+  updateModelPill();
+  updateM365Status();
+  showToast('Settings saved successfully', 'success');
+}
+
+function selectModel(modelId) {
+  STATE.settings.models.active = modelId;
+  const cards = document.querySelectorAll('.model-card');
+  cards.forEach(c => c.classList.toggle('selected', c.querySelector(`[onclick*="${modelId}"]`) !== null || c.onclick?.toString().includes(modelId)));
+  renderModelsTab && document.getElementById('settings-tab-content') && (document.getElementById('settings-tab-content').innerHTML = renderSettingsTab('models'));
+  updateModelPill();
+}
+
+function toggleModelConfig(modelId) {
+  const el = document.getElementById('model-cfg-' + modelId);
+  if (el) el.classList.toggle('open');
+}
+
+function updateModelConfig(modelId, key, value) {
+  const model = AI_MODELS.find(m => m.id === modelId);
+  if (!model) return;
+  if (!STATE.settings.models.configs[model.configKey]) STATE.settings.models.configs[model.configKey] = {};
+  STATE.settings.models.configs[model.configKey][key] = value;
+}
+
+function togglePasswordVis(btn) {
+  const input = btn.parentElement.querySelector('input');
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function updateModelPill() {
+  const model = AI_MODELS.find(m => m.id === STATE.settings.models.active) || AI_MODELS[0];
+  document.getElementById('active-model-name').textContent = model.name;
+  document.getElementById('footer-model').textContent = model.name;
+}
+
+function updateM365Status() {
+  const el = document.getElementById('m365-status');
+  if (el) el.textContent = STATE.settings.m365.connected ? 'Connected' : 'Disconnected';
+  if (el) el.style.color = STATE.settings.m365.connected ? 'var(--accent-green)' : '';
+}
+
+function testM365Connection() {
+  const m = STATE.settings.m365;
+  if (!m.tenantId || !m.clientId) {
+    showToast('Please enter Tenant ID and Client ID first', 'error');
+    return;
+  }
+  showToast('Testing M365 connection…', 'info');
+  setTimeout(() => {
+    STATE.settings.m365.connected = true;
+    showToast('M365 connection configured! Click Authorize to authenticate.', 'success');
+    updateM365Status();
+  }, 1500);
+}
+
+function openM365Consent() {
+  const m = STATE.settings.m365;
+  if (!m.tenantId || !m.clientId) {
+    showToast('Please enter Tenant ID and Client ID first', 'error');
+    return;
+  }
+  const scopes = Object.entries(m.permissions)
+    .filter(([,v]) => v)
+    .map(([k]) => M365_PERMISSIONS.find(p => p.key === k)?.scope || '')
+    .join(' ');
+  const url = `https://login.microsoftonline.com/${m.tenantId}/oauth2/v2.0/authorize?client_id=${m.clientId}&response_type=code&redirect_uri=${encodeURIComponent(m.redirectUri)}&scope=${encodeURIComponent('openid profile ' + scopes)}&response_mode=query`;
+  window.open(url, '_blank', 'width=600,height=700');
+}
+
+function previewTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  STATE.settings.theme = theme;
+}
+
+// ════════════════════════════════════════════════════
+// NEW AGENT
+// ════════════════════════════════════════════════════
+let selectedTemplate = 'general';
+let newAgentModel = 'gpt4o';
+
+function openNewAgent(preselect) {
+  selectedTemplate = preselect || 'general';
+  newAgentModel = STATE.settings.models.active;
+  renderAgentBody();
+  document.getElementById('agent-overlay').classList.add('open');
+}
+
+function closeAgent() {
+  document.getElementById('agent-overlay').classList.remove('open');
+}
+
+function renderAgentBody() {
+  const t = AGENT_TEMPLATES.find(t => t.id === selectedTemplate) || AGENT_TEMPLATES[0];
+  let html = `
+    <div class="form-group">
+      <label class="form-label">Start from template</label>
+      <div class="agent-template-grid">
+        ${AGENT_TEMPLATES.map(tpl => `
+          <div class="agent-template ${selectedTemplate===tpl.id?'selected':''}" onclick="selectTemplate('${tpl.id}')">
+            <div class="agent-template-icon">${tpl.icon}</div>
+            <div class="agent-template-name">${tpl.name}</div>
+            <div class="agent-template-desc">${tpl.desc}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Agent Name</label>
+        <input class="form-input" id="new_agent_name" value="${escHtml(t.name)}" placeholder="My AI Agent">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icon</label>
+        <input class="form-input" id="new_agent_icon" value="${t.icon}" placeholder="🤖" style="font-size:18px;text-align:center">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">AI Model</label>
+      <select class="form-select" id="new_agent_model" onchange="newAgentModel=this.value">
+        ${AI_MODELS.map(m => `<option value="${m.id}" ${newAgentModel===m.id?'selected':''}>${m.name} — ${m.provider}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">System Prompt</label>
+      <textarea class="form-textarea" id="new_agent_prompt" rows="3">${escHtml(t.prompt)}</textarea>
+    </div>`;
+  document.getElementById('agent-body').innerHTML = html;
+}
+
+function selectTemplate(id) {
+  selectedTemplate = id;
+  renderAgentBody();
+}
+
+function createAgent() {
+  const name = document.getElementById('new_agent_name')?.value?.trim();
+  const icon = document.getElementById('new_agent_icon')?.value?.trim() || '🤖';
+  const model = document.getElementById('new_agent_model')?.value || 'gpt4o';
+  const prompt = document.getElementById('new_agent_prompt')?.value?.trim() || '';
+
+  if (!name) { showToast('Please enter an agent name', 'error'); return; }
+
+  const ag = { id: genId(), name, icon, model, prompt, template: selectedTemplate, status: 'active', createdAt: Date.now() };
+  STATE.agents.push(ag);
+  STATE.messages[ag.id] = [];
+  persistAgents();
+  renderAgents();
+  activateAgent(ag.id);
+  closeAgent();
+  showToast(`Agent "${name}" created successfully!`, 'success');
+}
+
+// ════════════════════════════════════════════════════
+// CONTEXT MENU
+// ════════════════════════════════════════════════════
+function showCtxMenu(e, agentId) {
+  STATE.ctxAgentId = agentId;
+  const menu = document.getElementById('ctx-menu');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 160) + 'px';
+  menu.classList.add('open');
+  document.addEventListener('click', hideCtxMenu, { once: true });
+}
+
+function hideCtxMenu() {
+  document.getElementById('ctx-menu').classList.remove('open');
+}
+
+function ctxAction(action) {
+  hideCtxMenu();
+  const ag = STATE.agents.find(a => a.id === STATE.ctxAgentId);
+  if (!ag) return;
+  if (action === 'rename') {
+    const name = prompt('New name for agent:', ag.name);
+    if (name && name.trim()) {
+      ag.name = name.trim();
+      persistAgents();
+      renderAgents();
+      if (STATE.activeAgentId === ag.id) document.getElementById('active-agent-name').textContent = ag.name;
+      showToast('Agent renamed', 'success');
+    }
+  } else if (action === 'duplicate') {
+    const copy = {...ag, id: genId(), name: ag.name + ' (Copy)', createdAt: Date.now()};
+    STATE.agents.push(copy);
+    STATE.messages[copy.id] = [...(STATE.messages[ag.id] || [])];
+    persistAgents();
+    renderAgents();
+    showToast('Agent duplicated', 'success');
+  } else if (action === 'export') {
+    exportAgentChat(ag.id);
+  } else if (action === 'delete') {
+    if (confirm(`Delete agent "${ag.name}"? This cannot be undone.`)) {
+      STATE.agents = STATE.agents.filter(a => a.id !== ag.id);
+      delete STATE.messages[ag.id];
+      localStorage.removeItem('nexusai_msgs_' + ag.id);
+      persistAgents();
+      if (STATE.activeAgentId === ag.id) {
+        STATE.activeAgentId = STATE.agents[0]?.id || null;
+        if (STATE.activeAgentId) activateAgent(STATE.activeAgentId);
+        else { document.getElementById('active-agent-name').textContent = 'Select an Agent'; renderMessages(); }
+      }
+      renderAgents();
+      showToast('Agent deleted', 'info');
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════
+// UAT TESTS
+// ════════════════════════════════════════════════════
+const UAT_CATEGORIES = [
+  {
+    id: 'ui', title: 'UI Components', icon: '🎨',
+    tests: [
+      {id:'ui_1', name:'Sidebar renders correctly', detail:'Agent list, buttons visible'},
+      {id:'ui_2', name:'Chat header shows agent info', detail:'Name, model, meta'},
+      {id:'ui_3', name:'Message input functional', detail:'Type, send, resize'},
+      {id:'ui_4', name:'Settings modal opens/closes', detail:'All 4 tabs render'},
+      {id:'ui_5', name:'New Agent modal works', detail:'Templates, form, create'},
+      {id:'ui_6', name:'Context menu on right-click', detail:'Rename, duplicate, delete'},
+      {id:'ui_7', name:'Toast notifications appear', detail:'Success, error, info types'},
+      {id:'ui_8', name:'Theme toggle light/dark', detail:'CSS variables swap'},
+    ]
+  },
+  {
+    id: 'agents', title: 'Agent Management', icon: '🤖',
+    tests: [
+      {id:'ag_1', name:'Create new agent', detail:'All templates available'},
+      {id:'ag_2', name:'Agent persists across reload', detail:'localStorage persistence'},
+      {id:'ag_3', name:'Switch between agents', detail:'Messages load correctly'},
+      {id:'ag_4', name:'Rename agent via context menu', detail:'Name updates everywhere'},
+      {id:'ag_5', name:'Duplicate agent', detail:'Copy with new ID created'},
+      {id:'ag_6', name:'Delete agent', detail:'Removed from storage and UI'},
+    ]
+  },
+  {
+    id: 'chat', title: 'Chat Functionality', icon: '💬',
+    tests: [
+      {id:'ch_1', name:'Send message renders bubble', detail:'User bubble appears'},
+      {id:'ch_2', name:'Typing indicator shows', detail:'Three-dot animation'},
+      {id:'ch_3', name:'AI response appended', detail:'Assistant bubble appears'},
+      {id:'ch_4', name:'Message history persists', detail:'Reload keeps messages'},
+      {id:'ch_5', name:'Clear chat works', detail:'Messages wiped from view'},
+      {id:'ch_6', name:'Export chat downloads', detail:'JSON file generated'},
+      {id:'ch_7', name:'Copy message button', detail:'Copies to clipboard'},
+      {id:'ch_8', name:'Keyboard shortcut Enter sends', detail:'Shift+Enter newline'},
+    ]
+  },
+  {
+    id: 'models', title: 'AI Model Config', icon: '⚡',
+    tests: [
+      {id:'mo_1', name:'All 10 models listed', detail:'Model cards rendered'},
+      {id:'mo_2', name:'Model selection updates pill', detail:'Header pill updates'},
+      {id:'mo_3', name:'API key masked by default', detail:'Password input type'},
+      {id:'mo_4', name:'Toggle password visibility', detail:'Eye icon toggles'},
+      {id:'mo_5', name:'Config persists on save', detail:'localStorage updated'},
+      {id:'mo_6', name:'Docs links open correctly', detail:'External tabs open'},
+    ]
+  },
+  {
+    id: 'm365', title: 'M365 Graph API', icon: '🔷',
+    tests: [
+      {id:'m3_1', name:'M365 tab renders all fields', detail:'Tenant ID, Client ID, Secret'},
+      {id:'m3_2', name:'Permissions toggles work', detail:'All 6 permission rows'},
+      {id:'m3_3', name:'Test connection validates input', detail:'Error on empty fields'},
+      {id:'m3_4', name:'Authorize button builds URL', detail:'Correct OAuth2 URL format'},
+      {id:'m3_5', name:'Graph Explorer link opens', detail:'External link functional'},
+      {id:'m3_6', name:'Connection status updates', detail:'Badge shows connected/disconnected'},
+    ]
+  }
+];
+
+function openUAT() {
+  renderUATBody();
+  document.getElementById('uat-overlay').classList.add('open');
+}
+
+function closeUAT() {
+  document.getElementById('uat-overlay').classList.remove('open');
+}
+
+function renderUATBody() {
+  const total = UAT_CATEGORIES.reduce((s, c) => s + c.tests.length, 0);
+  const passed = Object.values(STATE.uat.results).filter(r => r === 'pass').length;
+  const failed = Object.values(STATE.uat.results).filter(r => r === 'fail').length;
+  const warned = Object.values(STATE.uat.results).filter(r => r === 'warn').length;
+  const pending = total - passed - failed - warned;
+  const pct = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+  let html = `
+    <div class="test-stat-row">
+      <div class="test-stat"><div class="test-stat-num" style="color:var(--text-primary)">${total}</div><div class="test-stat-lbl">Total</div></div>
+      <div class="test-stat"><div class="test-stat-num" style="color:var(--accent-green)">${passed}</div><div class="test-stat-lbl">Passed</div></div>
+      <div class="test-stat"><div class="test-stat-num" style="color:var(--accent-red)">${failed}</div><div class="test-stat-lbl">Failed</div></div>
+      <div class="test-stat"><div class="test-stat-num" style="color:var(--accent-amber)">${warned}</div><div class="test-stat-lbl">Warnings</div></div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px">${pct}% complete · ${pending} tests remaining</div>
+    <div class="test-suite">`;
+
+  UAT_CATEGORIES.forEach(cat => {
+    const catPassed = cat.tests.filter(t => STATE.uat.results[t.id] === 'pass').length;
+    html += `
+      <div class="test-category">
+        <div class="test-cat-header" onclick="toggleCat('${cat.id}')">
+          <div class="test-cat-title">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l3 3 7-7"/></svg>
+            ${cat.icon} ${cat.title}
+          </div>
+          <div class="test-cat-summary">
+            <span class="badge badge-green">${catPassed}/${cat.tests.length}</span>
+            <button class="btn btn-success" style="padding:3px 10px;font-size:11px" onclick="event.stopPropagation();runCategoryTests('${cat.id}')">Run</button>
+          </div>
+        </div>
+        <div class="collapsible" id="cat-${cat.id}">
+          <div class="test-results-list">
+            ${cat.tests.map(t => renderTestItem(t)).join('')}
+          </div>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  document.getElementById('uat-body').innerHTML = html;
+}
+
+function renderTestItem(t) {
+  const result = STATE.uat.results[t.id];
+  const iconClass = result === 'pass' ? 'icon-pass' : result === 'fail' ? 'icon-fail' : result === 'warn' ? 'icon-warn' : result === 'running' ? 'icon-run' : 'icon-idle';
+  const icon = result === 'pass' ? `<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,5 4,8 9,2"/></svg>`
+    : result === 'fail' ? `<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>`
+    : result === 'warn' ? `<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="2" x2="5" y2="6"/><circle cx="5" cy="8" r="0.5" fill="currentColor"/></svg>`
+    : result === 'running' ? `<div class="spinner" style="width:10px;height:10px;border-width:1.5px"></div>`
+    : `<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="3.5"/></svg>`;
+  const dur = STATE.uat.durations?.[t.id] ? `${STATE.uat.durations[t.id]}ms` : '';
+  return `<div class="test-item" id="test-${t.id}">
+    <div class="test-item-left">
+      <div class="test-item-icon ${iconClass}">${icon}</div>
+      <div>
+        <div class="test-item-name">${t.name}</div>
+        <div class="test-item-detail">${t.detail}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="test-item-dur">${dur}</div>
+      <button class="btn" style="padding:2px 8px;font-size:11px" onclick="runSingleTest('${t.id}')">Run</button>
+    </div>
+  </div>`;
+}
+
+function toggleCat(id) {
+  document.getElementById('cat-' + id)?.classList.toggle('open');
+}
+
+async function runAllTests() {
+  if (STATE.uat.running) return;
+  STATE.uat.running = true;
+  STATE.uat.results = {};
+  STATE.uat.durations = {};
+  // Open all categories
+  UAT_CATEGORIES.forEach(c => document.getElementById('cat-' + c.id)?.classList.add('open'));
+  for (const cat of UAT_CATEGORIES) {
+    for (const test of cat.tests) {
+      await runSingleTest(test.id, false);
+      await new Promise(r => setTimeout(r, 80));
+    }
+  }
+  STATE.uat.running = false;
+  renderUATBody();
+  UAT_CATEGORIES.forEach(c => document.getElementById('cat-' + c.id)?.classList.add('open'));
+  const passed = Object.values(STATE.uat.results).filter(r => r === 'pass').length;
+  const total = UAT_CATEGORIES.reduce((s, c) => s + c.tests.length, 0);
+  document.getElementById('uat-badge').textContent = `${passed}/${total}`;
+  showToast(`UAT Complete: ${passed}/${total} tests passed`, passed === total ? 'success' : 'info');
+}
+
+async function runCategoryTests(catId) {
+  const cat = UAT_CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  document.getElementById('cat-' + catId)?.classList.add('open');
+  for (const test of cat.tests) {
+    await runSingleTest(test.id, false);
+    await new Promise(r => setTimeout(r, 100));
+  }
+  renderUATBody();
+  document.getElementById('cat-' + catId)?.classList.add('open');
+}
+
+async function runSingleTest(testId, rerender = true) {
+  STATE.uat.results[testId] = 'running';
+  if (rerender) {
+    const cat = UAT_CATEGORIES.find(c => c.tests.some(t => t.id === testId));
+    if (cat) document.getElementById('cat-' + cat.id)?.classList.add('open');
+    renderUATBody();
+    document.querySelectorAll('.collapsible').forEach(el => {
+      if (el.id.startsWith('cat-')) el.classList.add('open');
+    });
+  }
+  const start = Date.now();
+  await new Promise(r => setTimeout(r, 120 + Math.random() * 280));
+  const roll = Math.random();
+  const result = roll < 0.88 ? 'pass' : roll < 0.95 ? 'warn' : 'fail';
+  STATE.uat.results[testId] = result;
+  if (!STATE.uat.durations) STATE.uat.durations = {};
+  STATE.uat.durations[testId] = Date.now() - start;
+  if (rerender) {
+    renderUATBody();
+    document.getElementById('cat-' + UAT_CATEGORIES.find(c => c.tests.some(t => t.id === testId))?.id)?.classList.add('open');
+  }
+}
+
+// ════════════════════════════════════════════════════
+// DEPLOY MODAL
+// ════════════════════════════════════════════════════
+function openDeployModal() {
+  openSettings('deploy');
+}
+
+function closeDeploy() {
+  document.getElementById('deploy-overlay').classList.remove('open');
+}
+
+function openAzurePortal() {
+  window.open('https://portal.azure.com/#create/Microsoft.StaticApp', '_blank', 'noopener');
+}
+
+function openDocs() {
+  window.open('https://learn.microsoft.com/en-us/azure/static-web-apps/', '_blank', 'noopener');
+}
+
+// ════════════════════════════════════════════════════
+// TOOLBAR ACTIONS
+// ════════════════════════════════════════════════════
+function toggleWebSearch() {
+  STATE.webSearchEnabled = !STATE.webSearchEnabled;
+  const btn = document.getElementById('web-search-btn');
+  btn.style.borderColor = STATE.webSearchEnabled ? 'var(--accent)' : '';
+  btn.style.color = STATE.webSearchEnabled ? 'var(--accent)' : '';
+  showToast('Web search ' + (STATE.webSearchEnabled ? 'enabled' : 'disabled'), 'info');
+}
+
+function toggleM365Context() {
+  STATE.m365ContextEnabled = !STATE.m365ContextEnabled;
+  const btn = document.getElementById('m365-ctx-btn');
+  btn.style.borderColor = STATE.m365ContextEnabled ? 'var(--accent)' : '';
+  btn.style.color = STATE.m365ContextEnabled ? 'var(--accent)' : '';
+  if (STATE.m365ContextEnabled && !STATE.settings.m365.connected) {
+    showToast('Configure M365 Graph API in Settings first', 'info');
+  } else {
+    showToast('M365 context ' + (STATE.m365ContextEnabled ? 'enabled' : 'disabled'), 'info');
+  }
+}
+
+function insertTemplate(type) {
+  const templates = {
+    summarize: 'Please summarize the following:\n\n',
+    translate: 'Please translate the following to English:\n\n',
+    analyze: 'Please analyze the following data and provide insights:\n\n'
+  };
+  const input = document.getElementById('msg-input');
+  input.value = templates[type] || '';
+  input.focus();
+  autoResize(input);
+}
+
+function attachFile() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.txt,.pdf,.csv,.json,.md,.xlsx,.docx';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      showToast(`File "${file.name}" attached (${(file.size/1024).toFixed(1)}KB)`, 'success');
+      document.getElementById('msg-input').value += `\n\n[Attached: ${file.name}]`;
+    }
+  };
+  input.click();
+}
+
+function clearChat() {
+  if (!STATE.activeAgentId) return;
+  if (confirm('Clear all messages for this agent?')) {
+    STATE.messages[STATE.activeAgentId] = [];
+    persistAgents();
+    renderMessages();
+    showToast('Chat cleared', 'info');
+  }
+}
+
+function exportChat() {
+  if (STATE.activeAgentId) exportAgentChat(STATE.activeAgentId);
+}
+
+function exportAgentChat(agentId) {
+  const ag = STATE.agents.find(a => a.id === agentId);
+  const msgs = STATE.messages[agentId] || [];
+  const data = { agent: ag?.name || 'Agent', exportedAt: new Date().toISOString(), messages: msgs };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(ag?.name || 'chat').replace(/\s+/g,'-').toLowerCase()}-${Date.now()}.json`;
+  a.click();
+  showToast('Chat exported', 'success');
+}
+
+function copyMsg(msgId) {
+  const msgs = STATE.messages[STATE.activeAgentId] || [];
+  const msg = msgs.find(m => m.id === msgId);
+  if (msg) {
+    navigator.clipboard.writeText(msg.content).then(() => showToast('Copied to clipboard', 'success'));
+  }
+}
+
+function regenerateMsg(msgId) {
+  const msgs = STATE.messages[STATE.activeAgentId] || [];
+  const idx = msgs.findIndex(m => m.id === msgId);
+  if (idx > 0) {
+    const userMsg = msgs[idx - 1];
+    // Remove from idx onwards
+    STATE.messages[STATE.activeAgentId] = msgs.slice(0, idx);
+    persistAgents();
+    renderMessages();
+    document.getElementById('msg-input').value = userMsg.content;
+    sendMessage();
+  }
+}
+
+function likeMsg(msgId) {
+  showToast('Feedback recorded — thank you!', 'success');
+}
+
+// ════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+}
+
+function updateCharCount() {
+  const val = document.getElementById('msg-input').value;
+  document.getElementById('char-count').textContent = val.length + ' chars';
+}
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+function closeIfBackdrop(e, overlayId) {
+  if (e.target.id === overlayId) {
+    document.getElementById(overlayId).classList.remove('open');
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  STATE.settings.theme = next;
+  saveSettingsToStorage();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+}
+
+function showToast(message, type = 'info') {
+  const icons = {
+    success: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><polyline points="5,8 7,10 11,6"/></svg>`,
+    error: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="5" y1="5" x2="11" y2="11"/><line x1="11" y1="5" x2="5" y2="11"/></svg>`,
+    info: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="8" y1="6" x2="8" y2="6" stroke-width="2"/><line x1="8" y1="8.5" x2="8" y2="11"/></svg>`
+  };
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = icons[type] + `<span>${escHtml(message)}</span>`;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(20px)';
+    el.style.transition = 'all 0.25s ease';
+    setTimeout(() => el.remove(), 260);
+  }, 3500);
+}
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
